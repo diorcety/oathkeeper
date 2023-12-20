@@ -20,6 +20,7 @@ type (
 		Realm string `json:"realm"`
 	}
 	ErrorWWWAuthenticate struct {
+		n string
 		c configuration.Provider
 		d ErrorWWWAuthenticateDependencies
 	}
@@ -29,10 +30,11 @@ type (
 )
 
 func NewErrorWWWAuthenticate(
+	n string,
 	c configuration.Provider,
 	d ErrorWWWAuthenticateDependencies,
 ) *ErrorWWWAuthenticate {
-	return &ErrorWWWAuthenticate{c: c, d: d}
+	return &ErrorWWWAuthenticate{n:n, c: c, d: d}
 }
 
 func (a *ErrorWWWAuthenticate) Handle(w http.ResponseWriter, r *http.Request, config json.RawMessage, _ pipeline.Rule, _ error) error {
@@ -68,5 +70,5 @@ func (a *ErrorWWWAuthenticate) Config(config json.RawMessage) (*ErrorWWWAuthenti
 }
 
 func (a *ErrorWWWAuthenticate) GetID() string {
-	return "www_authenticate"
+	return a.n
 }

@@ -259,3 +259,49 @@ func TestErrorReturnToRedirectURLHeaderUsage(t *testing.T) {
 		})
 	}
 }
+
+func TestErrorRedirectInstance(t *testing.T) {
+	conf := internal.NewConfigurationWithDefaults()
+	conf.SetForTest(t, "errors.handlers.redirect#forbidden.enabled", true)
+	reg := internal.NewRegistry(conf)
+
+	a, err := reg.PipelineErrorHandler("redirect#forbidden")
+	require.NoError(t, err)
+
+	t.Run("method=handle", func(t *testing.T) {
+		for k, tc := range []struct {
+			d           string
+			header      http.Header
+			config      string
+			expectError error
+			givenError  error
+			assert      func(t *testing.T, recorder *httptest.ResponseRecorder)
+		}{
+			{
+				d:          "should redirect with 302 - absolute (HTTP)",
+				givenError: &herodot.ErrNotFound,
+				config:     `{"to":"http://test/test"}`,
+				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
+					assert.Equal(t, 302, rw.Code)
+					assert.Equal(t, "http://test/test", rw.Header().Get("Location"))
+				},
+			},
+		} {
+			t.Run(fmt.Sprintf("case=%d/description=%s", k, tc.d), func(t *testing.T) {
+				w := httptest.NewRecorder()
+				r := httptest.NewRequest("GET", "/test", nil)
+				err := a.Handle(w, r, json.RawMessage(tc.config), nil, tc.givenError)
+
+				if tc.expectError != nil {
+					require.EqualError(t, err, tc.expectError.Error(), "%+v", err)
+					return
+				}
+
+				require.NoError(t, err)
+				if tc.assert != nil {
+					tc.assert(t, w)
+				}
+			})
+		}
+	})
+}

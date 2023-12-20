@@ -22,6 +22,7 @@ type (
 		Verbose bool `json:"verbose"`
 	}
 	ErrorJSON struct {
+		n string
 		c configuration.Provider
 		d errorJSONDependencies
 	}
@@ -31,10 +32,11 @@ type (
 )
 
 func NewErrorJSON(
+	n string,
 	c configuration.Provider,
 	d errorJSONDependencies,
 ) *ErrorJSON {
-	return &ErrorJSON{c: c, d: d}
+	return &ErrorJSON{n:n, c: c, d: d}
 }
 
 func (a *ErrorJSON) Handle(w http.ResponseWriter, r *http.Request, config json.RawMessage, _ pipeline.Rule, handleError error) error {
@@ -89,5 +91,5 @@ func (a *ErrorJSON) Config(config json.RawMessage) (*ErrorJSONConfig, error) {
 }
 
 func (a *ErrorJSON) GetID() string {
-	return "json"
+	return a.n
 }

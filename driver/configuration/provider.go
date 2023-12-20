@@ -83,6 +83,7 @@ type Provider interface {
 }
 
 type ProviderErrorHandlers interface {
+	ErrorHandlers() []string
 	ErrorHandlerConfig(id string, override json.RawMessage, dest interface{}) error
 	ErrorHandlerIsEnabled(id string) bool
 	ErrorHandlerFallbackSpecificity() []string

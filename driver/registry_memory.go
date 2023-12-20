@@ -6,6 +6,7 @@ package driver
 import (
 	"context"
 	"sync"
+	"strings"
 
 	"go.opentelemetry.io/otel/trace"
 
@@ -250,10 +251,20 @@ func (r *RegistryMemory) prepareErrors() {
 	defer r.Unlock()
 
 	if r.errors == nil {
-		interim := []pe.Handler{
-			pe.NewErrorJSON(r.c, r),
-			pe.NewErrorRedirect(r.c, r),
-			pe.NewErrorWWWAuthenticate(r.c, r),
+		var interim []pe.Handler
+		interim = []pe.Handler{
+			pe.NewErrorJSON("json", r.c, r),
+			pe.NewErrorRedirect("redirect", r.c, r),
+			pe.NewErrorWWWAuthenticate("www_authenticate", r.c, r),
+		}
+		for _, key := range r.c.ErrorHandlers() {
+			if strings.HasPrefix(key, "json#") {
+				interim = append(interim, pe.NewErrorJSON(key, r.c, r))
+			} else if strings.HasPrefix(key, "redirect#") {
+				interim = append(interim, pe.NewErrorRedirect(key, r.c, r))
+			} else if strings.HasPrefix(key, "www_authenticate#") {
+				interim = append(interim, pe.NewErrorWWWAuthenticate(key, r.c, r))
+			}
 		}
 
 		r.errors = map[string]pe.Handler{}

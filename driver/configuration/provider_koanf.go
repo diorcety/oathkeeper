@@ -338,8 +338,9 @@ func (v *KoanfProvider) PipelineConfig(prefix, id string, override json.RawMessa
 }
 
 func (v *KoanfProvider) validatePipelineConfig(prefix, id string, marshalled []byte) error {
+	id_parts := strings.SplitN(id, "#", 2)
 	rawComponentSchema, err := schema.FS.ReadFile(fmt.Sprintf(
-		"pipeline/%s.%s.schema.json", strings.Split(prefix, ".")[0], id))
+		"pipeline/%s.%s.schema.json", strings.Split(prefix, ".")[0], id_parts[0]))
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -366,6 +367,10 @@ func (v *KoanfProvider) validatePipelineConfig(prefix, id string, marshalled []b
 	}
 
 	return nil
+}
+
+func (v *KoanfProvider) ErrorHandlers() []string {
+	return v.source.MapKeys(ErrorsHandlers)
 }
 
 func (v *KoanfProvider) ErrorHandlerConfig(id string, override json.RawMessage, dest interface{}) error {

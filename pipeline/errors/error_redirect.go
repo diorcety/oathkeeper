@@ -28,6 +28,7 @@ type (
 		ReturnToQueryParam string `json:"return_to_query_param"`
 	}
 	ErrorRedirect struct {
+		n string
 		c configuration.Provider
 		d ErrorRedirectDependencies
 	}
@@ -37,10 +38,11 @@ type (
 )
 
 func NewErrorRedirect(
+	n string,
 	c configuration.Provider,
 	d ErrorRedirectDependencies,
 ) *ErrorRedirect {
-	return &ErrorRedirect{c: c, d: d}
+	return &ErrorRedirect{n: n, c: c, d: d}
 }
 
 func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, config json.RawMessage, _ pipeline.Rule, _ error) error {
@@ -79,7 +81,7 @@ func (a *ErrorRedirect) Config(config json.RawMessage) (*ErrorRedirectConfig, er
 }
 
 func (a *ErrorRedirect) GetID() string {
-	return "redirect"
+	return a.n
 }
 
 func (a *ErrorRedirect) RedirectURL(uri *url.URL, c *ErrorRedirectConfig) string {

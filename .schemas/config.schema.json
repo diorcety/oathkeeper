@@ -1158,7 +1158,7 @@
           "examples": [["redirect"]]
         },
         "handlers": {
-          "additionalProperties": false,
+          "additionalProperties": true,
           "title": "Individual Error Handler Configuration",
           "type": "object",
           "properties": {
